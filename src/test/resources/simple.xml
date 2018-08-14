@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<books>
+  <book>
+    <title>Clojure in Action</title>
+    <authors>
+      <author>
+        <first-name>Amit</first-name>
+        <last-name>Rathore</last-name>
+      </author>
+      <author>
+        <first-name>Francis</first-name>
+        <last-name>Avila</last-name>
+      </author>
+    </authors>
+  </book>
+  <book>
+    <title>The Joy of Clojure</title>
+    <authors>
+      <author>
+        <first-name>Michael</first-name>
+        <last-name>Fogus</last-name>
+      </author>
+      <author>
+        <first-name>Chris</first-name>
+        <last-name>Houser</last-name>
+      </author>
+    </authors>
+  </book>
+</books>

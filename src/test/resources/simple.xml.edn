@@ -1,0 +1,21 @@
+{:tag :books, 
+ :attrs nil, 
+ :content 
+ [{:tag :book, :attrs nil, :content 
+   [{:tag :title, :attrs nil, :content ["Clojure in Action"]} 
+    {:tag :authors, :attrs nil, :content 
+     [{:tag :author, :attrs nil, :content 
+       [{:tag :first-name, :attrs nil, :content ["Amit"]} 
+        {:tag :last-name, :attrs nil, :content ["Rathore"]}]} 
+      {:tag :author, :attrs nil, :content 
+       [{:tag :first-name, :attrs nil, :content ["Francis"]} 
+        {:tag :last-name, :attrs nil, :content ["Avila"]}]}]}]} 
+  {:tag :book, :attrs nil, :content 
+   [{:tag :title, :attrs nil, :content ["The Joy of Clojure"]} 
+    {:tag :authors, :attrs nil, :content 
+     [{:tag :author, :attrs nil, :content 
+       [{:tag :first-name, :attrs nil, :content ["Michael"]} 
+        {:tag :last-name, :attrs nil, :content ["Fogus"]}]} 
+      {:tag :author, :attrs nil, :content 
+       [{:tag :first-name, :attrs nil, :content ["Chris"]} 
+        {:tag :last-name, :attrs nil, :content ["Houser"]}]}]}]}]}
