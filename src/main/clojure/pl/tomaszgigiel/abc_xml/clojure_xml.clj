@@ -3,6 +3,8 @@
   (:require [clojure.xml])
   (:gen-class))
 
+;; https://clojuredocs.org/clojure.xml
+
 (defn abc-parse
   [s]
   (clojure.xml/parse s))

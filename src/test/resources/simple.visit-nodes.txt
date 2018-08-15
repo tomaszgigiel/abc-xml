@@ -1,0 +1,10 @@
+/books/book/title=Clojure in Action
+/books/book/authors/author/first-name=Amit
+/books/book/authors/author/last-name=Rathore
+/books/book/authors/author/first-name=Francis
+/books/book/authors/author/last-name=Avila
+/books/book/title=The Joy of Clojure
+/books/book/authors/author/first-name=Michael
+/books/book/authors/author/last-name=Fogus
+/books/book/authors/author/first-name=Chris
+/books/book/authors/author/last-name=Houser
