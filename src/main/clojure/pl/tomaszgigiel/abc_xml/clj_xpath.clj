@@ -14,7 +14,7 @@
 
 (defn all-tags
   [xml]
-  (let [nodes (tree-seq (fn [n] (:node n)) ; (:node n) - $x:node, nil or node
+  (let [nodes (tree-seq (fn [n] (:node n)) ; (:node n) - $x:node, nil or node, branch?
                         (fn [n] (xpath/$x "./*" n)) ; "./*" - children of current
                         (first (xpath/$x "/*" xml))) ; "/*" - top
         fun (fn [n] (:tag n))]
