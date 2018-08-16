@@ -12,13 +12,21 @@
   [r]
   (slurp (io/resource r)))
 
-(defn all-tags
-  [xml]
+(defn perform-nodes
+  [xml fun]
   (let [nodes (tree-seq (fn [n] (:node n)) ; (:node n) - $x:node, nil or node, branch?
                         (fn [n] (xpath/$x "./*" n)) ; "./*" - children of current
-                        (first (xpath/$x "/*" xml))) ; "/*" - top
-        fun (fn [n] (:tag n))]
-  (distinct (map fun nodes))))
+                        (first (xpath/$x "/*" xml)))] ; "/*" - top
+  (remove nil? (distinct (map fun nodes)))))
+
+(defn all-tags
+  [xml]
+  (perform-nodes xml (fn [n] (:tag n))))
+
+(defn path-node-pairs
+  [xml]
+  (let [nodes (xpath/$x "/*" xml)]
+    ()))
 
 (defn visit-nodes
   [path nodes f]

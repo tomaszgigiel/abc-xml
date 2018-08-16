@@ -8,6 +8,8 @@
 (use-fixtures :once mytest/once-fixture)
 (use-fixtures :each mytest/each-fixture)
 
+(def not-nil? (complement nil?))
+
 (deftest xml-string-by-resource-test
   (is (.contains (abc/xml-string-by-resource "simple.xml") "<books>")))
 
@@ -15,7 +17,8 @@
   (let [xml (abc/xml-string-by-resource "simple.xml")
         nodes (xpath/$x "/*" xml)
         simple-visit-nodes (slurp (io/resource "simple.visit-nodes.txt"))
-        leaf-info (fn [p n] (if (abc/leaf? n) (printf "%1$s=%2$s\r\n" p (:text n))))]
+        leaf-info (fn [p n] (if (abc/leaf? n) (printf "%1$s=%2$s\r\n" p (:text n))))
+        leaf-or-nil (fn [p n] (if (abc/leaf? n) n))]
     (is (= :books (xpath/$x:tag "/*" xml)))
     (is (= (list :book :book) (xpath/$x:tag* "/books/book" xml)))
     (is (= () (xpath/$x:tag* "/non-existent/non-existent" xml)))
@@ -32,4 +35,12 @@
     (is (= clojure.lang.LazySeq (class nodes)))
     (is (= clojure.lang.LazySeq (class nodes)))
     (is (= (list :books :book :title :authors :author :first-name :last-name) (abc/all-tags xml)))
-    (is (= simple-visit-nodes (with-out-str (abc/visit-nodes "" nodes leaf-info))))))
+    (is (nil? (leaf-info "dummy" (first (xpath/$x "/books/book/authors/author/first-name" xml)))))
+    (is (not-nil? (leaf-or-nil "dummy" (first (xpath/$x "/books/book/authors/author/first-name" xml)))))
+    (is (= simple-visit-nodes (with-out-str (abc/visit-nodes "" nodes leaf-info))))
+    (is (= 0 (count (abc/visit-nodes "" nodes leaf-or-nil))))))
+
+(deftest perform-nodes-test
+  (let [xml (abc/xml-string-by-resource "simple.xml")
+        leaf-or-nil (fn [n] (if (abc/leaf? n) n))]
+    (is (= 10 (count (abc/perform-nodes xml leaf-or-nil))))))
