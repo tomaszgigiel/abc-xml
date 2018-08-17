@@ -12,27 +12,64 @@
   [r]
   (slurp (io/resource r)))
 
-(defn perform-nodes
-  [xml fun]
-  (let [nodes (tree-seq (fn [n] (:node n)) ; (:node n) - $x:node, nil or node, branch?
-                        (fn [n] (xpath/$x "./*" n)) ; "./*" - children of current
-                        (first (xpath/$x "/*" xml)))] ; "/*" - top
-  (remove nil? (distinct (map fun nodes)))))
-
-(defn all-tags
-  [xml]
-  (perform-nodes xml (fn [n] (:tag n))))
-
-(defn path-node-pairs
-  [xml]
-  (let [nodes (xpath/$x "/*" xml)]
-    ()))
-
-(defn visit-nodes
-  [path nodes f]
-  (let [current-path (fn[path n] (str path "/" (name(:tag n))))]
-    (mapcat (fn [n] (do (f (current-path path n) n)(visit-nodes (current-path path n) (xpath/$x "./*" n) f))) nodes)))
-
 (defn leaf?
   [n]
   (empty? (xpath/$x "./*" n)))
+
+;; https://github.com/clojure/clojure/blob/clojure-1.9.0/src/clj/clojure/core.clj#L4871
+(defn tree-seq-ancestry
+  [branch? children root]
+  (let [walk
+        (fn walk [node parents] 
+          (lazy-seq 
+            (cons {node parents} 
+                  (when (branch? node)
+                    (mapcat (fn [n] (walk n (cons n parents)))(children node))))))]
+    (walk root (list))))
+
+;; disadvantages: traversing twice, tree, list
+(defn xpath-seq-ancestry
+  [xml]
+  (let [nodes (tree-seq-ancestry (fn [n] (:node n))            ; branch?: nil or node
+                                 (fn [n] (xpath/$x "./*" n))   ; children: "./*" - children of current
+                                 (first (xpath/$x "/*" xml)))] ; root: "/*" - top
+    (remove nil? (distinct nodes))))
+
+;; disadvantages: traversing twice, tree, list
+(defn xpath-seq-transition
+  [xml f]
+  (let [nodes (tree-seq (fn [n] (:node n))            ; branch?: nil or node
+                        (fn [n] (xpath/$x "./*" n))   ; children: "./*" - children of current
+                        (first (xpath/$x "/*" xml)))] ; root: "/*" - top
+  (remove nil? (distinct (map f nodes)))))
+
+;; disadvantages: traversing twice, tree, list
+(defn xpath-seq-ancestry-transition
+  [xml f]
+  (let [nodes])
+  (xpath-seq-transition xml f))
+  
+  (let [nodes (tree-seq-ancestry (fn [n] (:node n))            ; branch?: nil or node
+                                 (fn [n] (xpath/$x "./*" n))   ; children: "./*" - children of current
+                                 (first (xpath/$x "/*" xml)))] ; root: "/*" - top
+    (remove nil? (distinct nodes))))
+
+
+
+
+(defn all-tags
+  [xml]
+  (xpath-seq-transition xml (fn [n] (:tag n))))
+
+(defn all-paths
+  [xml]
+
+  
+  ;;(tree-seq-ancestry xml (fn [n] (:tag n))))
+
+
+;;;
+(defn my-xml [] (xml-string-by-resource "simple.xml"))
+(all-tags (my-xml))
+
+(first (all-paths (my-xml)))
