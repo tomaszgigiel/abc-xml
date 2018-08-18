@@ -1,5 +1,4 @@
 (ns pl.tomaszgigiel.abc-xml.clj-xpath
-  (:require [clojure.java.io :as io])
   (:require [clojure.string :as string])
   (:require [clojure.tools.logging :as log])
   (:require [clj-xpath.core :as xpath])
@@ -7,69 +6,50 @@
 
 ;; https://github.com/kyleburton/clj-xpath
 ;; http://kyleburton.github.io/clj-xpath/site/
+;; https://github.com/clojure/clojure/blob/clojure-1.9.0/src/clj/clojure/core.clj#L4871
 
-(defn xml-string-by-resource
-  [r]
-  (slurp (io/resource r)))
-
-(defn leaf?
+(defn xpath-leaf?
   [n]
   (empty? (xpath/$x "./*" n)))
 
-;; https://github.com/clojure/clojure/blob/clojure-1.9.0/src/clj/clojure/core.clj#L4871
-(defn tree-seq-ancestry
+(defn xpath-seq
+  [xml]
+  (tree-seq (fn [n] (:node n))            ; branch?: nil or node with children or not
+            (fn [n] (xpath/$x "./*" n))   ; children: "./*" - children of current
+            (first (xpath/$x "/*" xml)))) ; root: "/*" - top
+
+;; disadvantages: traversing twice, tree, list
+(defn xpath-transformed-seq
+  [xml f]
+  (map f (xpath-seq xml)))
+
+(defn tree-ancestry-seq
   [branch? children root]
   (let [walk
-        (fn walk [node parents] 
+        (fn walk [node ancestors] 
           (lazy-seq 
-            (cons {node parents} 
-                  (when (branch? node)
-                    (mapcat (fn [n] (walk n (cons n parents)))(children node))))))]
-    (walk root (list))))
+            (conj (when (branch? node) (mapcat (fn [n] (walk n (conj ancestors node)))(children node)))
+                  {:node node :ancestors ancestors})))]
+    (walk root [])))
 
-;; disadvantages: traversing twice, tree, list
-(defn xpath-seq-ancestry
+(defn xpath-ancestry-seq
   [xml]
-  (let [nodes (tree-seq-ancestry (fn [n] (:node n))            ; branch?: nil or node
-                                 (fn [n] (xpath/$x "./*" n))   ; children: "./*" - children of current
-                                 (first (xpath/$x "/*" xml)))] ; root: "/*" - top
-    (remove nil? (distinct nodes))))
+  (tree-ancestry-seq (fn [n] (:node n))            ; branch?: nil or node
+                     (fn [n] (xpath/$x "./*" n))   ; children: "./*" - children of current
+                     (first (xpath/$x "/*" xml)))) ; root: "/*" - top
 
 ;; disadvantages: traversing twice, tree, list
-(defn xpath-seq-transition
+(defn xpath-ancestry-transformed-seq
   [xml f]
-  (let [nodes (tree-seq (fn [n] (:node n))            ; branch?: nil or node
-                        (fn [n] (xpath/$x "./*" n))   ; children: "./*" - children of current
-                        (first (xpath/$x "/*" xml)))] ; root: "/*" - top
-  (remove nil? (distinct (map f nodes)))))
+  (map f (xpath-ancestry-seq xml)))
 
-;; disadvantages: traversing twice, tree, list
-(defn xpath-seq-ancestry-transition
-  [xml f]
-  (let [nodes])
-  (xpath-seq-transition xml f))
-  
-  (let [nodes (tree-seq-ancestry (fn [n] (:node n))            ; branch?: nil or node
-                                 (fn [n] (xpath/$x "./*" n))   ; children: "./*" - children of current
-                                 (first (xpath/$x "/*" xml)))] ; root: "/*" - top
-    (remove nil? (distinct nodes))))
-
-
-
-
-(defn all-tags
+(defn kyleburton-alternative-all-tags
   [xml]
-  (xpath-seq-transition xml (fn [n] (:tag n))))
+  (distinct (xpath-transformed-seq xml (fn [n] (name (:tag n))))))
 
-(defn all-paths
+(defn kyleburton-alternative-all-paths
   [xml]
-
-  
-  ;;(tree-seq-ancestry xml (fn [n] (:tag n))))
-
-
-;;;
-(defn my-xml [] (xml-string-by-resource "simple.xml"))
-(all-tags (my-xml))
-
-(first (all-paths (my-xml)))
+  (let [node-tag (fn [n] (str "/" (name (:tag n))))
+        node-tag-path (fn [ns] (string/join (map node-tag ns)))
+        full-path (fn [m] (str (node-tag-path (:ancestors m)) (node-tag (:node m))))]
+    (distinct(xpath-ancestry-transformed-seq xml full-path))))

@@ -1,0 +1,7 @@
+/books
+/books/book
+/books/book/title
+/books/book/authors
+/books/book/authors/author
+/books/book/authors/author/first-name
+/books/book/authors/author/last-name
