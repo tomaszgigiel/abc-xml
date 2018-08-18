@@ -57,7 +57,7 @@
   (is (= all-paths-from-resource all-paths) "list of all distinct paths")))
 
 (deftest kyleburton-alternative-all-tags-test
-  (is (= (list :books :book :title :authors :author :first-name :last-name) (abc/kyleburton-alternative-all-tags xml)) "all tags"))
+  (is (= (list "books" "book" "title" "authors" "author" "first-name" "last-name") (abc/kyleburton-alternative-all-tags xml)) "all tags"))
 
 (deftest kyleburton-alternative-all-paths-test
   (let [all-paths-from-resource (string/split-lines(abc-core/string-from-resource "simple.all-paths.txt"))]
