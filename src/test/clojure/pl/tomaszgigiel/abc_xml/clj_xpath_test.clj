@@ -12,7 +12,7 @@
 
 (def xml (abc-core/string-from-resource "simple.xml"))
 
-(deftest xpath-test
+(deftest xpath-simple-test
   (is (= :books (xpath/$x:tag "/*" xml)) "get root node tag")
   (is (= (list :book :book) (xpath/$x:tag* "/books/book" xml)) "get list of tag nodes by path")
   (is (= () (xpath/$x:tag* "/non-existent/non-existent" xml)) "get empty list of tag nodes by completely non existent path")
@@ -25,6 +25,13 @@
   (is (= 0 (count (xpath/$x "./*" (first (xpath/$x "/books/book/authors/author/first-name" xml))))) "nothing, too deep path")
   (is (= () (xpath/$x "./*" (first (xpath/$x "/books/book/authors/author/first-name" xml)))) "nothing, too deep path")
   (is (= clojure.lang.LazySeq (class (xpath/$x "/*" xml))) "xpath result is LazySeq"))
+
+;; https://stackoverflow.com/a/3926682
+(deftest xpath-advanced-test
+  (is (= (list :title :first-name :last-name) (distinct (xpath/$x:tag* "//*[not(*)]" xml))) "all leaves tags")
+  (is (= (list :title :first-name :last-name) (distinct (xpath/$x:tag* "//*[not(child::*)]" xml))) "all leaves tags")
+  (is (= 37 (count (xpath/$x:text* "//node()[not(node())]" xml))) "all nodes text (leaves or not)")
+  (is (some #(= "\n" %) (xpath/$x:text* "//node()[not(node())]" xml)) "all nodes text (leaves or not)"))
 
 (deftest abc-leaf-test
   (is (= true (abc/xpath-leaf? (first (xpath/$x "/books/book/authors/author/first-name" xml)))) "no children")
@@ -57,8 +64,13 @@
   (is (= all-paths-from-resource all-paths) "list of all distinct paths")))
 
 (deftest kyleburton-alternative-all-tags-test
-  (is (= (list "books" "book" "title" "authors" "author" "first-name" "last-name") (abc/kyleburton-alternative-all-tags xml)) "all tags"))
+  (is (= (list "books" "book" "title" "authors" "author" "first-name" "last-name") (abc/kyleburton-alternative-all-tags xml)) "all tags")
+  (is (= (map #(name %) (distinct (xpath/$x:tag* "//*" xml))) (abc/kyleburton-alternative-all-tags xml)) "all tags"))
 
 (deftest kyleburton-alternative-all-paths-test
   (let [all-paths-from-resource (string/split-lines(abc-core/string-from-resource "simple.all-paths.txt"))]
     (is (= all-paths-from-resource (abc/kyleburton-alternative-all-paths xml)) "list of all distinct paths")))
+
+(deftest path-text-pairs-test
+  (is (= 10 (count (abc/path-text-pairs xml))) "list path text pairs")
+  (is (some #(= {:path "/books/book/title", :text "Clojure in Action"} %) (abc/path-text-pairs xml)) "list path text pairs"))

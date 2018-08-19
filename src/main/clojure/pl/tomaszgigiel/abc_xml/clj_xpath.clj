@@ -53,3 +53,12 @@
         node-tag-path (fn [ns] (string/join (map node-tag ns)))
         full-path (fn [m] (str (node-tag-path (:ancestors m)) (node-tag (:node m))))]
     (distinct(xpath-ancestry-transformed-seq xml full-path))))
+
+(defn path-text-pairs
+  [xml]
+  (let [node-tag (fn [n] (str "/" (name (:tag n))))
+        node-tag-path (fn [ns] (string/join (map node-tag ns)))
+        full-path (fn [m] (str (node-tag-path (:ancestors m)) (node-tag (:node m))))
+        node-text (fn [m] (:text (:node m)))
+        path-text-pair (fn [m] (when (xpath-leaf? m) {:path (full-path m) :text (node-text m)}))]
+    (filter some? (xpath-ancestry-transformed-seq xml path-text-pair))))
