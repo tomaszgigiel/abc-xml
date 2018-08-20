@@ -31,7 +31,10 @@
   (is (= (list :title :first-name :last-name) (distinct (xpath/$x:tag* "//*[not(*)]" xml))) "all leaves tags")
   (is (= (list :title :first-name :last-name) (distinct (xpath/$x:tag* "//*[not(child::*)]" xml))) "all leaves tags")
   (is (= 37 (count (xpath/$x:text* "//node()[not(node())]" xml))) "all nodes text (leaves or not)")
-  (is (some #(= "\n" %) (xpath/$x:text* "//node()[not(node())]" xml)) "all nodes text (leaves or not)"))
+  (is (some #(= "\n" %) (xpath/$x:text* "//node()[not(node())]" xml)) "all nodes text (leaves or not)")
+  (is (= (list :first-name :last-name) (distinct (xpath/$x:tag* "//*[ancestor::author]" xml))) "all leaves tags for author branch")
+  (is (= "Amit" (xpath/$x:text "/books/book[1]/authors[1]/author[1]/first-name[1]" xml)) "first name")
+  (is (= (list :books :book :authors :author) (distinct (xpath/$x:tag* "//first-name/ancestor::*" xml))) "first name"))
 
 (deftest abc-leaf-test
   (is (= true (abc/xpath-leaf? (first (xpath/$x "/books/book/authors/author/first-name" xml)))) "no children")
