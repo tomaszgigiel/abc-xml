@@ -77,3 +77,13 @@
 (deftest path-text-pairs-test
   (is (= 10 (count (abc/path-text-pairs xml))) "list path text pairs")
   (is (some #(= {:path "/books/book/title", :text "Clojure in Action"} %) (abc/path-text-pairs xml)) "list path text pairs"))
+
+(defn xml-to-csv
+  [xml] 
+  (let [perform-item (fn [c m] {:columns (conj (:columns c) (:path m)) :rows (conj (:rows c) (:text m))})]
+    (reduce
+      perform-item
+      {:columns [] :rows ()}
+      (abc/path-text-pairs xml))))
+
+(xml-to-csv xml)
