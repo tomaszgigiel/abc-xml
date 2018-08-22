@@ -80,10 +80,18 @@
 
 (defn xml-to-csv
   [xml] 
-  (let [perform-item (fn [c m] {:columns (conj (:columns c) (:path m)) :rows (conj (:rows c) (:text m))})]
+  (let [cols ["/books/book/title" "/books/book/authors/author/first-name" "/books/book/authors/author/last-name"]
+        col-index (fn [cols col] (.indexOf cols col))
+        cell-count (fn [r] (->> r (re-seq #",") count))
+        complete-row (fn [before idx] (str "before:" idx))
+
+        perform-row (fn [last cols path val] (if (> (col-index cols path) (cell-count last)) [(str last "," val)] [last (str (complete-row last (col-index cols path)) val)]))
+
+        perform-item (fn perform-item ([rows cell] (perform-item (pop rows) (last rows) cols (:path cell) (:text cell)))
+                       ([butlast last cols path val] (into [] (concat butlast (perform-row last cols path val)))))]
     (reduce
       perform-item
-      {:columns [] :rows ()}
+      [""]
       (abc/path-text-pairs xml))))
 
 (xml-to-csv xml)
