@@ -21,7 +21,7 @@
 
 
 ;; (take 30 (tag-seq))
-(defn tag-seq [] (map #(string/replace (format "%10s" %) #" " "0") (abc-seq)))
+(defn tag-seq [] (map #(string/replace (format "%10s" %) #" " "k") (abc-seq)))
 
 ;; (take 30 (val-seq))
 (defn val-seq [] (map #(string/replace (format "%20s" %) #" " "x") (abc-seq)))
@@ -40,4 +40,5 @@
                          (cons (generator-line b h tags vals) (if (> count 0) (generator-lines b h (- count 1) tags vals) ())))]
     (xml/element (str (first tags)) {} (geneator-lines b h count (rest tags) vals))))
 
+;; (spit "sample-trapeze.xml" (xml/emit-str (sample-xml-trapeze 2 5 7 (tag-seq) (val-seq))))
 ;; (spit "sample-trapeze.xml" (xml/emit-str (sample-xml-trapeze 25 25 500 (tag-seq) (val-seq))))
