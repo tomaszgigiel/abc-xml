@@ -37,7 +37,7 @@
                              (= h 0) ()
                              (= b 0) (cons (xml/element tag {} (first vals)) (generator-line b (- h 1) (rest tags) (rest vals))))))
         geneator-lines (fn generator-lines [b h count tags vals]
-                         (cons (generator-line b h tags vals) (if (> count 0) (generator-lines b h (- count 1) tags vals) ())))]
+                         (cons (generator-line b h tags vals) (if (> count 1) (generator-lines b h (- count 1) tags vals) ())))]
     (xml/element (str (first tags)) {} (geneator-lines b h count (rest tags) vals))))
 
 ;; (spit "sample-trapeze.xml" (xml/emit-str (sample-xml-trapeze 2 5 7 (tag-seq) (val-seq))))
